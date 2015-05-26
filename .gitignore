@@ -1,3 +1,5 @@
+code/*.java
+code/*.class
 .DS_Store*
 Thumbs.db
 *~
