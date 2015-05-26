@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Compile</title>
+    <link rel="stylesheet" href="css/uikit.almost-flat.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.3.0/codemirror.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+<nav class="uk-navbar">
+    <div class="uk-container uk-container-center">  
+        <ul class="uk-navbar-nav">
+            <li><a href="javascript:void(0)" id="run">執行</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="uk-container uk-container-center">
+    <div class="uk-flex main-flex-wrapper">
+        <div class="uk-width-1-4 uk-flex uk-flex-column left-side">
+            <div class="question">
+                <h2>題目</h2>
+                <p>印出Hello world</p>
+            </div>
+            <div class="ans-output">
+                <h2>輸出</h2>
+                <pre>Hello world</pre>
+            </div>
+        </div>
+        <div class="uk-width-3-4">
+            <div id="editor"></div>
+        </div>
+    </div>
+</div>
+
+<div id="stdout-modal" class="uk-modal">
+    <div class="uk-modal-dialog">
+        <a class="uk-modal-close uk-close"></a>
+        <h2>輸出結果</h2>
+        <pre id="stdout"></pre>
+    </div>
+</div>
+
+<script src="js/uikit.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.3.0/codemirror.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.3.0/mode/clike/clike.min.js"></script>
+<script>
+(function () {
+    var codeMirror = CodeMirror(document.getElementById('editor'), {
+        value: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello world\");\n    }\n}",
+        mode: "text/x-java",
+        matchBrackets: true,
+        lineNumbers: true,
+        indentUnit: 4
+    });
+
+$(function () {
+    $('#run').click(function () {
+        $.post('/run', {code: codeMirror.getValue()})
+        .done(function (data) {
+            $('#stdout').html(data);
+            UIkit.modal("#stdout-modal").show();
+        });
+    });
+});
+}());
+</script>
+</body>
+</html>
