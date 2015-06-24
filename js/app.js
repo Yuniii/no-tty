@@ -56,7 +56,7 @@ $(function () {
     function checkAns (userAns, stdAns) {
         console.log(userAns);
         console.log(stdAns);
-        if (userAns === stdAns || userAns === (stdAns + '\n'))
+        if (userAns === stdAns || userAns === (stdAns + '\n') || userAns === (stdAns + '\r\n'))
             return true;
         return false;
     }

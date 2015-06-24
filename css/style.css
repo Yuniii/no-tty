@@ -19,3 +19,7 @@ html, body {
 .ans-output {
     border-top: 1px solid #DDD;
 }
+
+.login-form {
+	margin-top: 36px;
+}
