@@ -1,0 +1,12 @@
+{
+	"name": "online-compile",
+	"version": "0.0.1",
+	"description": "online compile",
+	"author": "yun",
+	"dependencies": {
+		"express": "^4.0.0",
+		"mongoose": "latest",
+		"mongodb-uri": "latest",
+		"body-parser": "latest"
+	}
+}

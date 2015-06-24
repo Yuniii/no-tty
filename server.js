@@ -1,10 +1,32 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
     fs = require('fs'),
-    exec = require('child_process').exec;
+    exec = require('child_process').exec,
+    mongoose = require('mongoose'),
+    uriUtil = require('mongodb-uri');
+
 var app = express();
 var port = process.env.PORT || 8080;
+/*
+var mongodbUri = 'mongodb://admin:jsland@127.0.0.1:27017/jsland';
+var mongooseUri = uriUtil.formatMongoose(mongodbUri);
+mongoose.connect(mongooseUri, options);
 
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+
+var quizSchema = new mongoose.Schema({
+    sn: String,
+    title: String,
+    content: String,
+    stdout: String,
+    ans: String,
+    chapter: String,
+    default: String
+}, {collection: 'quiz'});
+
+var quiz = mongoose.model('quiz', quizSchema);
+*/
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -29,6 +51,11 @@ app.post('/run', function (req, res) {
 });
 
 app.use('/', express.static(__dirname + '/'));
-
-console.log(port);
+/*
+db.once('open', function (callback) {
+    app.listen(port, function () {
+        console.log("Node app is running" + port);
+    });
+});
+*/
 app.listen(port);
