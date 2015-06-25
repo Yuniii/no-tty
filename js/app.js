@@ -1,4 +1,5 @@
 var quizData;
+var user;
 $(function () {
 
     var api = '//jsland-api.herokuapp.com/quiz/',
@@ -73,6 +74,7 @@ $(function () {
     $run.click(function () {
         $.post('/run', {code: codeMirror.getValue()})
         .done(function (data) {
+            user = data;
             $('#stdout').html(data);
             if (checkAns(data, quizData[currentQuizNo].stdout)) {
                 $check.html('答案正確！');

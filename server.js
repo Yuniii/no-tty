@@ -1,4 +1,5 @@
 var express = require('express'),
+    session = require('express-session'),
     bodyParser = require('body-parser'),
     fs = require('fs'),
     exec = require('child_process').exec,
@@ -10,52 +11,81 @@ var port = process.env.PORT || 8080;
 
 var mongodbUri = 'mongodb://admin:jsland@ds043329.mongolab.com:43329/jsland';
 var mongooseUri = uriUtil.formatMongoose(mongodbUri);
-mongoose.connect(mongooseUri, options);
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+var userSchema = new mongoose.Schema({
+    account: String,
+    password: String
+}, {collection: 'user'});
 
-/*
-var quizSchema = new mongoose.Schema({
-    sn: String,
-    title: String,
-    content: String,
-    stdout: String,
-    ans: String,
-    chapter: String,
-    default: String
-}, {collection: 'quiz'});
+var user = mongoose.model('user', userSchema);
 
-var quiz = mongoose.model('quiz', quizSchema);
-*/
+function checkAuth (req, res, next) {
+    if (req.session.userAccount) {
+        next();
+        return;
+    }
+    res.redirect('/login');
+}
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({secret: '1234', resave: false, saveUninitialized: false}));
+
+app.get('/app', checkAuth, function (req, res) {
+    res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/login', function (req, res) {
+    if (req.session.userAccount) {
+        res.redirect('/app');
+        return;
+    }
+    res.sendFile(__dirname + '/login.html');
+});
 
 app.post('/login', function (req, res) {
-
+    if (req.session.userAccount) {
+        res.redirect('/app');
+        return;
+    } 
+    if (req.body.account === 'account' && req.body.password === '1234') {
+        req.session.userAccount = req.body.account;
+        res.redirect('/app');
+    } else {
+        res.redirect('/login');
+    }
 });
 
 app.post('/run', function (req, res) {
     var className = 'Main',
         path = __dirname + '/code/',
-        file = path + className + '.java';
+        javaFile = path + className + '.java';
 
     if ( ! fs.existsSync(path)) {
         fs.mkdirSync(path);
     }
-    if (fs.existsSync(file)) {
-        fs.unlinkSync(file);
+    if (fs.existsSync(javaFile)) {
+        fs.unlinkSync(javaFile);
     }
 
-    fs.writeFileSync(file, req.body.code);
-    exec('javac ' + file, function (er, o, e) {
+    fs.writeFileSync(javaFile, req.body.code);
+    exec('javac -encoding utf8 ' + javaFile, function (err, o, e) {
+        console.log(err);
         exec('java -classpath ' + path + ' ' + className, function (err, stdout, stderr) {
             res.send(stdout);
         });
     });
 });
 
-app.use('/', express.static(__dirname + '/'));
+app.use('/js/', express.static(__dirname + '/js/'));
+app.use('/css/', express.static(__dirname + '/css/'));
+app.use('/fonts/', express.static(__dirname + '/fonts/'));
+
+
+mongoose.connect(mongooseUri, { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } });
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
 
 db.once('open', function (callback) {
     console.log(app.get('port'));
