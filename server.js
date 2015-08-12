@@ -69,11 +69,8 @@ app.post('/run', function (req, res) {
     }
 
     fs.writeFileSync(javaFile, req.body.code);
-    exec('javac -encoding utf8 ' + javaFile, function (err, o, e) {
-        console.log(err);
-        exec('java -classpath ' + path + ' ' + className, function (err, stdout, stderr) {
-            res.send(stdout);
-        });
+    exec('echo 00000000 | sudo -S docker run -v ' + path + ':/data/mounted derrickh/java7', function (err, stdout, stderr) {
+        res.send(stdout);
     });
 });
 
