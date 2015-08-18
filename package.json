@@ -3,11 +3,16 @@
   "version": "0.0.1",
   "description": "online compile",
   "author": "yun",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yuniii/no-tty.git"
+  },
   "dependencies": {
     "body-parser": "latest",
     "express": "^4.0.0",
     "express-session": "^1.11.3",
     "mongodb-uri": "latest",
-    "mongoose": "latest"
+    "mongoose": "latest",
+    "shortid": "^2.2.2"
   }
 }

@@ -4,20 +4,14 @@ var express = require('express'),
     fs = require('fs'),
     exec = require('child_process').exec,
     mongoose = require('mongoose'),
-    uriUtil = require('mongodb-uri');
+    uriUtil = require('mongodb-uri'),
+    shortID = require('shortid');
 
 var app = express();
-var port = process.env.PORT || 8080;
+var port = 8080;
 
 var mongodbUri = 'mongodb://admin:jsland@ds043329.mongolab.com:43329/jsland';
 var mongooseUri = uriUtil.formatMongoose(mongodbUri);
-
-var userSchema = new mongoose.Schema({
-    account: String,
-    password: String
-}, {collection: 'user'});
-
-var user = mongoose.model('user', userSchema);
 
 function checkAuth (req, res, next) {
     if (req.session.userAccount) {
@@ -58,7 +52,7 @@ app.post('/login', function (req, res) {
 
 app.post('/run', function (req, res) {
     var className = 'Main',
-        path = __dirname + '/code/',
+        path = __dirname + '/' + shortID.generate() + '/',
         javaFile = path + className + '.java';
 
     if ( ! fs.existsSync(path)) {
@@ -67,10 +61,12 @@ app.post('/run', function (req, res) {
     if (fs.existsSync(javaFile)) {
         fs.unlinkSync(javaFile);
     }
-
     fs.writeFileSync(javaFile, req.body.code);
+
     exec('echo 00000000 | sudo -S docker run -v ' + path + ':/data/mounted derrickh/java7', function (err, stdout, stderr) {
         res.send(stdout);
+        fs.unlinkSync(javaFile);
+        fs.rmdirSync(path);
     });
 });
 
@@ -78,13 +74,12 @@ app.use('/js/', express.static(__dirname + '/js/'));
 app.use('/css/', express.static(__dirname + '/css/'));
 app.use('/fonts/', express.static(__dirname + '/fonts/'));
 
-
 mongoose.connect(mongooseUri, { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } });
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
 db.once('open', function (callback) {
-    console.log(app.get('port'));
+    console.log('port: ' + port);
     app.listen(port);
 });
