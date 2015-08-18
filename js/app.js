@@ -1,11 +1,7 @@
-var quizData;
-var user;
-$(function () {
-
-    var api = '//jsland-api.herokuapp.com/quiz/',
-        apiAll = api + 'all',
-        currentQuizNo = 0;
-//        quizData;
+$(function() {
+    var api = '//jsland-api.herokuapp.com/quiz/all',
+        currentQuizNo = 0,
+        quizData;
 
     var $prev = $('#prev'),
         $next = $('#next'),
@@ -22,7 +18,7 @@ $(function () {
         indentUnit: 4
     });
 
-    function fixNewLineChar (data) {
+    function fixNewLineChar(data) {
         if (typeof data.content != 'undefined') 
             data.content = data.content.replace(/\n/g, '<br>');
         if (typeof data.stdout != 'undefined')
@@ -33,10 +29,26 @@ $(function () {
         return data;
     }
 
-    function loadQuizData () {
+    function applyQuiz(n) {
+        if (typeof quizData == 'undefined')
+            return;
+
+        $quizContent.html(quizData[n].content);
+        $quizStdAns.html(quizData[n].stdout);
+    }
+
+    function checkAns(userAns, stdAns) {
+        console.log(userAns);
+        console.log(stdAns);
+        if (userAns === stdAns || userAns === (stdAns + '\n') || userAns === (stdAns + '\r\n'))
+            return true;
+        return false;
+    }
+
+    function loadQuizData() {
         $.ajax({
             type: 'GET',
-            url: apiAll,
+            url: api,
             dataType: 'jsonp'
         }).done(function (data) {
             data = fixNewLineChar(data);
@@ -46,23 +58,7 @@ $(function () {
         });
     }
 
-    function applyQuiz (n) {
-        if (typeof quizData == 'undefined')
-            return;
-
-        $quizContent.html(quizData[n].content);
-        $quizStdAns.html(quizData[n].stdout);
-    }
-
-    function checkAns (userAns, stdAns) {
-        console.log(userAns);
-        console.log(stdAns);
-        if (userAns === stdAns || userAns === (stdAns + '\n') || userAns === (stdAns + '\r\n'))
-            return true;
-        return false;
-    }
-
-    function go () {
+    function go() {
         if ( ! sessionStorage.getItem('quiz')) {
             loadQuizData();
         } else {
@@ -71,10 +67,9 @@ $(function () {
         }
     }
 
-    $run.click(function () {
+    $run.click(function() {
         $.post('/run', {code: codeMirror.getValue()})
         .done(function (data) {
-            user = data;
             $('#stdout').html(data);
             if (checkAns(data, quizData[currentQuizNo].stdout)) {
                 $check.html('答案正確！');
@@ -85,11 +80,11 @@ $(function () {
         });
     });
 
-    $next.click(function () {
+    $next.click(function() {
         applyQuiz(++currentQuizNo);
     });
 
-    $prev.click(function () {
+    $prev.click(function() {
         if (currentQuizNo === 0) {
             return;
         }

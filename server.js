@@ -3,15 +3,10 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     fs = require('fs'),
     exec = require('child_process').exec,
-    mongoose = require('mongoose'),
-    uriUtil = require('mongodb-uri'),
     shortID = require('shortid');
 
 var app = express();
 var port = 8080;
-
-var mongodbUri = 'mongodb://admin:jsland@ds043329.mongolab.com:43329/jsland';
-var mongooseUri = uriUtil.formatMongoose(mongodbUri);
 
 function checkAuth (req, res, next) {
     if (req.session.userAccount) {
@@ -74,12 +69,5 @@ app.use('/js/', express.static(__dirname + '/js/'));
 app.use('/css/', express.static(__dirname + '/css/'));
 app.use('/fonts/', express.static(__dirname + '/fonts/'));
 
-mongoose.connect(mongooseUri, { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } });
-
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-
-db.once('open', function (callback) {
-    console.log('port: ' + port);
-    app.listen(port);
-});
+console.log('port: ' + port);
+app.listen(port);
